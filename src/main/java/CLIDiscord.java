@@ -19,7 +19,7 @@ public class CLIDiscord {
     public static String botName;
 
     public static void main(String[] args) {
-        String token = "OTU0NjUyMTUxMjk1MTE1Mjk0.YjWPGQ.IqSgm0OEHWMyXpk-LxWmFxNBHi4";
+        String token = "";
 
         DiscordApi api = new DiscordApiBuilder().setAllIntents().setToken(token).login().join();
 
