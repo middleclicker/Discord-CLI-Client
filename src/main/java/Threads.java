@@ -1,9 +1,12 @@
 import org.javacord.api.entity.channel.ServerChannel;
+import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.channel.ServerTextChannelBuilder;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 
 import java.io.File;
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -13,20 +16,28 @@ public class Threads {
     public static class fileSystemWatcherThread extends Thread {
         public void run() {
             try {
-                Path filePath = Paths.get("data/" + CLIDiscord.server.getName());
-                WatchService watchService = FileSystems.getDefault().newWatchService();
-                filePath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE);
+                Path dir = Paths.get("data/" + CLIDiscord.server.getName());
 
                 Timer timer = new Timer();
                 while (CLIDiscord.channelWatch) {
-                    if (timer.passedS(10)) {
+                    if (timer.passedS(30)) {
                         timer.reset();
 
-                        WatchKey key;
-                        key = watchService.poll();
-
-                        if (key != null) {
-                            key.pollEvents().forEach(System.out::println);
+                        if (!CLIDiscord.serverChannelPaths.isEmpty()) {
+                            Files.walk(dir).forEach(path -> {
+                                if (path.toFile().isDirectory() && !path.toFile().getPath().equals("data\\" + CLIDiscord.server.getName())) {
+                                    if (CLIDiscord.serverChannelPaths.contains(path)) {
+                                        CLIDiscord.serverChannelPaths.remove(path);
+                                    } else if (!CLIDiscord.serverChannelPaths.contains(path)) {
+                                        String[] splitPath = path.toFile().getPath().split("/");
+                                        System.out.println(Arrays.toString(splitPath));
+                                    }
+                                    // TODO: Add case for channel deletion
+                                }
+                            });
+                        } else {
+                            cloneServerThread thread = new cloneServerThread();
+                            thread.run();
                         }
                     }
                 }
@@ -82,6 +93,8 @@ public class Threads {
                         case CHANNEL_CATEGORY:
                             new File("data/" + CLIDiscord.server.getName() + "/" + folderName).mkdirs();
                             currentCategory = "data/" + CLIDiscord.server.getName() + "/" + folderName;
+                            System.out.println(currentCategory);
+                            CLIDiscord.serverChannelPaths.add(Path.of(currentCategory));
                             continue;
                         case SERVER_TEXT_CHANNEL:
                             if (currentCategory.isEmpty()) {
@@ -92,6 +105,9 @@ public class Threads {
                                 currentThread = currentCategory + "/" + folderName + "/";
                             }
 
+                            System.out.println(currentThread);
+                            CLIDiscord.serverChannelPaths.add(Path.of(currentThread));
+
                             List<Message> messages = ((TextChannel) s).getMessagesAsStream().collect(Collectors.toList());
                             Utils.processMessages(messages, currentThread);
 
@@ -99,12 +115,18 @@ public class Threads {
                         case SERVER_VOICE_CHANNEL:
                             if (currentCategory.isEmpty()) {
                                 new File("data/" + CLIDiscord.server.getName() + "/" + folderName).mkdirs();
+                                System.out.println("data/" + CLIDiscord.server.getName() + "/" + folderName);
+                                CLIDiscord.serverChannelPaths.add(Path.of("data/" + CLIDiscord.server.getName() + "/" + folderName));
                             } else {
                                 new File(currentCategory + "/" + folderName).mkdirs();
+                                System.out.println(currentCategory + "/" + folderName);
+                                CLIDiscord.serverChannelPaths.add(Path.of(currentCategory + "/" + folderName));
                             }
                             continue;
                         case SERVER_PUBLIC_THREAD:
                             new File(currentThread + "/" + folderName).mkdirs();
+                            System.out.println(currentThread + "/" + folderName);
+                            CLIDiscord.serverChannelPaths.add(Path.of(currentThread + "/" + folderName));
                             messages = ((TextChannel) s).getMessagesAsStream().collect(Collectors.toList());
                             Utils.processMessages(messages, currentThread);
                             continue;

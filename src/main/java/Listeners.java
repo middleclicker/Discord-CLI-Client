@@ -1,9 +1,11 @@
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.server.member.ServerMemberJoinEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.listener.server.member.ServerMemberJoinListener;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class Listeners {
@@ -39,12 +41,9 @@ public class Listeners {
                 CLIDiscord.channelWatch = !CLIDiscord.channelWatch;
                 CLIDiscord.server = event.getServer().get();
 
-                // event.getChannel().sendMessage("W.I.P.");
-                Threads.activeCloningDetectionThread object = new Threads.activeCloningDetectionThread();
-                Threads.fileSystemWatcherThread object2 = new Threads.fileSystemWatcherThread();
+                Threads.fileSystemWatcherThread object = new Threads.fileSystemWatcherThread();
                 if (CLIDiscord.channelWatch) {
                     object.start();
-                    object2.start();
                 }
             }
 
@@ -56,12 +55,17 @@ public class Listeners {
                 object.start();
             }
 
+            if (message.equalsIgnoreCase("!github")) {
+                event.getChannel().sendMessage("Here ya go: https://github.com/middleclicker/Discord-Penis-Bot");
+            }
+
             if (message.equalsIgnoreCase("!ping")) {
                 event.getChannel().sendMessage("I'm alive mf now stop pinging me.");
             }
 
             if (message.equalsIgnoreCase("!help")) {
-                event.getChannel().sendMessage("Fuck off, here are your shitty commands: toggleUserInput, toggleChannelWatch, toggleDisplayMessages, cloneServer, ping, help, ratio, cope, penis, amongus, fortniteBurger, clearConsole");
+                event.getChannel().sendMessage("Fuck off, here are your shitty commands: \n" +
+                        "toggleUserInput\ntoggleChannelWatch\ntoggleDisplayMessages\ncloneServer\nping\nhelp\nratio\ncope\npenis\namongus\nfortniteBurger\nclearConsole\ngithub\nannoy");
             }
 
             if (message.equalsIgnoreCase("!ratio")) {
@@ -75,6 +79,45 @@ public class Listeners {
             if (message.equalsIgnoreCase("!penis")) {
                 BoolStringPair pair = Utils.generatePenis();
                 event.getChannel().sendMessage(pair.j);
+            }
+
+            if (message.toLowerCase().startsWith("!l ")) {
+                if (Utils.checkNumberInputs(message, 1, event.getChannel())) {
+                    int n = Integer.parseInt(message.split(" ")[1]);
+                    if (n < 1 || n > 10) {
+                        event.getChannel().sendMessage("Why do you need such a big L?");
+                    } else {
+                        event.getChannel().sendMessage(Utils.generateL(n));
+                    }
+                }
+            }
+
+            if (message.toLowerCase().startsWith("!annoy ")) {
+                CLIDiscord.server = event.getServer().get();
+
+                String[] splitMsg = message.split(" ");
+                if (Utils.checkNumberInputs(message, 2, event.getChannel())) {
+                    User user = null;
+                    int numberToRepeat = Integer.parseInt(splitMsg[2]);
+
+                    if (numberToRepeat > 10) {
+                        User author = event.getMessageAuthor().asUser().get();
+                        event.getChannel().sendMessage(author.getMentionTag() + " When you ask for too much, you get nothing.");
+                    } else {
+                        try {
+                            long id = Long.parseLong(splitMsg[1]);
+                            user = CLIDiscord.server.getMemberById(id).get();
+                        } catch (NoSuchElementException e) {
+                            event.getChannel().sendMessage("Bro thats not a real person.");
+                        }
+
+                        if (user != null) {
+                            for (int i = 0; i < numberToRepeat; i++) {
+                                event.getChannel().sendMessage("Yo bitch someone told me to annoy you " + user.getMentionTag());
+                            }
+                        }
+                    }
+                }
             }
 
             if (message.equalsIgnoreCase("!amongus")) {

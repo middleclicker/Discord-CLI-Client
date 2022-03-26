@@ -5,6 +5,8 @@ import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CLIDiscord {
@@ -12,6 +14,7 @@ public class CLIDiscord {
     public static boolean displayMessages = false;
     public static boolean channelWatch = false;
     public static List<ServerChannel> serverChannelsList;
+    public static List<Path> serverChannelPaths = new ArrayList<>();
     public static User bot;
     public static Server server;
     public static TextChannel channel;

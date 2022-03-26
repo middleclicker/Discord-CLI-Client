@@ -1,15 +1,16 @@
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Utils {
     public static void processMessages(List<Message> messages, String path) throws IOException {
         File file = new File(path + "content.txt");
-        System.out.println("Writing into: " + path + "content.txt");
         if (!file.createNewFile()) {
             file.delete();
             file.createNewFile();
@@ -20,6 +21,52 @@ public class Utils {
         }
         writer.flush();
         writer.close();
+    }
+
+    public static boolean checkNumberInputs(String message, int targetNumInputs, TextChannel channel) {
+        String[] splitMsg = message.split(" ");
+        if (splitMsg.length != targetNumInputs+1) {
+            channel.sendMessage("Heyo bucko, " + targetNumInputs + " inputs please.");
+            return false;
+        } else {
+            for (int i = 1; i <= targetNumInputs; i++) {
+                if (!Utils.isNumeric(splitMsg[i])) {
+                    channel.sendMessage("Imagine inputting something which isn't even a number lmfao");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static String generateL(int n) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("```");
+        for (int i = 0; i < n; i++) {
+            if (i == n-1) {
+                sb.append('|');
+                continue;
+            }
+            sb.append("|\n");
+        }
+        for (int i = 0; i < n; i++) {
+            sb.append('_');
+        }
+        sb.append("```");
+
+        return sb.toString();
+    }
+
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 
     public static void deleteDirectory(File directory) {

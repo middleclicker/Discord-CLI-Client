@@ -1,28 +1,9 @@
-import java.io.File;
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class testclass {
-    public  static void main (String [] args) {
-        try {
-            // create a new file object
-            File directory = new File("data/middleclicker person's server");
+    public static void main(String... args) throws Exception {
 
-            deleteDirectory(directory);
-
-        } catch (Exception e) {
-            e.getStackTrace();
-        }
-    }
-
-    public static void deleteDirectory(File directory) {
-        if(directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if(files != null) {
-                for(File file : files) {
-                    deleteDirectory(file);
-                }
-            }
-        }
-        directory.delete();
     }
 }
